@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,85 +17,46 @@ import javax.swing.JPanel;
 
 public class LifeFrame extends JFrame implements ActionListener {
 
-	private Game game;
+	private Game game = new Game();
 	private JButton startButton = new JButton();
+	private ExecutorService exe = Executors.newSingleThreadExecutor();
 
-	
-	public void LifeFrame() {
+	public LifeFrame() {
+
+		System.out.println("in frame");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
+
 		JPanel lifeButtonsPanel = new JPanel();
 		lifeButtonsPanel.setLayout(new GridLayout(5, 5));
-		
-		for(int i=0; i<5; i++) {
-			for(int j=0; j<5; j++) {
-				Cell button=new Cell(i, j);
-				button = game.cells.get(i).set(j, button);
+
+		for (int i = 0; i < 5; i++) {
+			ArrayList<Cell> setOfCells = new ArrayList<>();
+			game.cells.add(setOfCells);
+			for (int j = 0; j < 5; j++) {
+				Cell button = new Cell(i, j);
+				setOfCells.add(button);
 				lifeButtonsPanel.add(button);
 				button.addActionListener(this);
-			}	
+				button.addNeighborCoords();
+			}
 		}
-		
-		JPanel operationButtonsPanel=new JPanel();
+
+		JPanel operationButtonsPanel = new JPanel();
 		operationButtonsPanel.setLayout(new FlowLayout());
 		startButton.setText("Start");
 		operationButtonsPanel.add(startButton);
 		startButton.addActionListener(this);
-		
-		JPanel wholePanel=new JPanel();
+
+		JPanel wholePanel = new JPanel();
 		wholePanel.setLayout(new BorderLayout());
 		wholePanel.add(operationButtonsPanel, BorderLayout.SOUTH);
 		wholePanel.add(lifeButtonsPanel, BorderLayout.CENTER);
-		
+
 		this.setContentPane(wholePanel);
 		this.setPreferredSize(new Dimension(600, 600));
 		this.pack();
-	
+
 	}
-
-	/**
-	 * Returns the light status of a light button in the frame.
-	 * 
-	 * @param row
-	 * @param column
-	 * @return buttonArray[row][column].isOn()
-	 * @throws IndexOutOfBoundsException
-	 */
-//	public boolean lightIsOn(int row, int column) throws IndexOutOfBoundsException {
-//		if (row > 5 || row < 0 || column > 5 || column < 0) {
-//			throw new IndexOutOfBoundsException("Index is incorrect");
-//		}
-//		return buttonArray[row][column].isOn();
-//	}
-
-	/**
-	 * Toggles the light of a button along with its neighbor light buttons.
-	 * 
-	 * @param row
-	 * @param column
-	 * @throws IndexOutOfBoundsException
-	 */
-//	public void toggleLight(int row, int column) throws IndexOutOfBoundsException {
-//		if (row > 5 || row < 0 || column > 5 || column < 0) {
-//			throw new IndexOutOfBoundsException("Index is incorrect");
-//		}
-//		buttonArray[row][column].toggle();
-//		if (row + 1 < 5) {
-//			buttonArray[row + 1][column].toggle();
-//		}
-//
-//		if (row - 1 >= 0) {
-//			buttonArray[row - 1][column].toggle();
-//		}
-//
-//		if (column + 1 < 5) {
-//			buttonArray[row][column + 1].toggle();
-//		}
-//
-//		if (column - 1 >= 0) {
-//			buttonArray[row][column - 1].toggle();
-//		}
-//	}
 
 	/**
 	 * Performs and calls all relevant operations when a button is clicked, or
@@ -103,18 +66,28 @@ public class LifeFrame extends JFrame implements ActionListener {
 		if (event.getSource() instanceof Cell) {
 			Cell clickedCell = (Cell) event.getSource();
 			
+			System.out.println("click cell");
 			clickedCell.toggleAlive();
 		}
 
 		if (event.getSource().equals(startButton)) {
-			this.game = new Game();
-			while(true) {
-				for(ArrayList<Cell> row : game.cells){
-					for(Cell cell : row) {
-						game.elavaluateCell(cell);
+			
+			exe.submit(() ->{
+				while(!Thread.currentThread().isInterrupted()) {
+					for(ArrayList<Cell> row : game.cells){
+						for(Cell cell : row) {
+							game.elavaluateCell(cell);
+						}
+					}
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
-			}
+			});
 		}
 	}
 }
