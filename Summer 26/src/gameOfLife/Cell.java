@@ -28,7 +28,7 @@ public class Cell extends JButton{
 	}
 
 	public void toggleAlive() {
-		System.out.println("toggle");
+//		System.out.println("toggle: " +this.getXCoord()+","+this.getYCoord());
 		if(this.isAlive==true) {
 			this.isAlive=false;
 			this.setIcon(lightOff);
@@ -53,7 +53,7 @@ public class Cell extends JButton{
 		neighborCoords.add(new CellCoord(cellX + 1, cellY + 1));
 		neighborCoords.add(new CellCoord(cellX + 1, cellY));
 		neighborCoords.add(new CellCoord(cellX + 1, cellY - 1));
-		neighborCoords.add(new CellCoord(cellX, cellY - 1));
+		neighborCoords.add(new CellCoord(cellX, cellY + 1));
 
 	}
 	

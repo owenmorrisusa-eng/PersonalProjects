@@ -23,16 +23,15 @@ public class LifeFrame extends JFrame implements ActionListener {
 
 	public LifeFrame() {
 
-		System.out.println("in frame");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		JPanel lifeButtonsPanel = new JPanel();
-		lifeButtonsPanel.setLayout(new GridLayout(5, 5));
+		lifeButtonsPanel.setLayout(new GridLayout(10, 10));
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 10; i++) {
 			ArrayList<Cell> setOfCells = new ArrayList<>();
 			game.cells.add(setOfCells);
-			for (int j = 0; j < 5; j++) {
+			for (int j = 0; j < 10; j++) {
 				Cell button = new Cell(i, j);
 				setOfCells.add(button);
 				lifeButtonsPanel.add(button);
@@ -65,28 +64,34 @@ public class LifeFrame extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() instanceof Cell) {
 			Cell clickedCell = (Cell) event.getSource();
-			
-			System.out.println("click cell");
+
 			clickedCell.toggleAlive();
 		}
 
 		if (event.getSource().equals(startButton)) {
-			
-			exe.submit(() ->{
-				while(!Thread.currentThread().isInterrupted()) {
-					for(ArrayList<Cell> row : game.cells){
-						for(Cell cell : row) {
-							game.elavaluateCell(cell);
+
+			exe.submit(() -> {
+				while (!Thread.currentThread().isInterrupted()) {
+					ArrayList<Cell> toggleCells = new ArrayList<Cell>();
+					for (ArrayList<Cell> row : game.cells) {
+						for (Cell cell : row) {
+							if (game.elavaluateCell(cell)) {
+								toggleCells.add(cell);
+							}
 						}
 					}
-					
+
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					for (Cell cell : toggleCells) {
+						cell.toggleAlive();
+					}
 				}
+
 			});
 		}
 	}
